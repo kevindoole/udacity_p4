@@ -119,3 +119,37 @@ class ConferenceQueryForm(messages.Message):
 class ConferenceQueryForms(messages.Message):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     filters = messages.MessageField(ConferenceQueryForm, 1, repeated=True)
+
+
+class ConferenceSession(ndb.Model):
+    """Session -- Session object"""
+    title = ndb.StringProperty(required=True)
+    highlights = ndb.TextProperty()
+    websafeConferenceKey = ndb.StringProperty()
+    speakerKeys = ndb.TextProperty(repeated=True)
+    duration = ndb.IntegerProperty()
+    typeOfSession = ndb.StringProperty()
+    date = ndb.DateProperty(required=True)
+    startTime = ndb.TimeProperty(required=True)
+
+class ConferenceSessionForm(messages.Message):
+    """SessionForm -- Session query inbound form message"""
+    title = messages.StringField(1)
+    highlights = messages.StringField(2)
+    speakerId = messages.StringField(3)
+    duration = messages.IntegerField(4)
+    typeOfSession = messages.StringField(5)
+    date = messages.StringField(6)
+    startTime = messages.StringField(7)
+    conferenceId = messages.StringField(8)
+
+class ConferenceSessionForms(messages.Message):
+    """SessionForms -- multiple Session outbound form message"""
+    items = messages.MessageField(ConferenceSessionForm, 1, repeated=True)
+
+
+
+class Speaker(ndb.Model):
+    """Speaker -- Speaker object"""
+    name = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
