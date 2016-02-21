@@ -23,6 +23,7 @@ from google.appengine.ext import ndb
 
 from models import ConflictException
 from models import ConferenceSessionForms, ConferenceSessionForm, ConferenceSession
+from models import Speaker, SpeakerForm
 from models import Profile, ProfileMiniForm, ProfileForm
 from models import StringMessage, BooleanMessage
 from models import Conference, ConferenceForm, ConferenceForms, ConferenceQueryForms
@@ -535,6 +536,15 @@ class ConferenceApi(remote.Service):
         csf.check_initialized()
         return csf
 
+    def _findOrCreateSpeakers(self, email):
+        speaker_key = ndb.Key(Speaker, email)
+        if speaker_key.get() is None:
+            speaker_key = Speaker(email=email).put().urlsafe()
+        else:
+            speaker_key = speaker_key.get().urlsafe()
+
+        return speaker_key
+
     def _createConferenceSessionObject(self, request):
         """Create or update Session object, returning SessionForm/request."""
         # preload necessary data items
@@ -555,12 +565,11 @@ class ConferenceApi(remote.Service):
 
         # copy SessionForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
-        # TODO: Implement speakers
 
-        data['websafeConferenceKey'] = data['conferenceId']
-
-        del data['speakerId']
-        del data['conferenceId']
+        if request.speakerEmails:
+            data['speakerKeys'] = [self._findOrCreateSpeakers(email) for email in request.speakerEmails]
+        del data['speakerEmails']
+        # TODO: Enable speaker entities to be updated
 
         # convert dates from strings to Date objects; set month based on start_date
         data['date'] = datetime.strptime(data['date'], "%Y-%m-%d").date()
@@ -568,7 +577,7 @@ class ConferenceApi(remote.Service):
 
         # generate Conference Key from request data and Session
         # ID based on Conference key get Session key from ID
-        c_key = ndb.Key(urlsafe=request.conferenceId)
+        c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
         s_id = ConferenceSession.allocate_ids(size=1, parent=c_key)[0]
         s_key = ndb.Key(ConferenceSession, s_id, parent=c_key)
         data['key'] = s_key
