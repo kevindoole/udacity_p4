@@ -7,27 +7,25 @@ conference.py -- Udacity conference server-side Python App Engine API;
 $Id: conference.py,v 1.25 2014/05/24 23:42:19 wesc Exp wesc $
 
 created by wesc on 2014 apr 21
+wesc+api@google.com (Wesley Chun)
 
 """
-
-__author__ = 'wesc+api@google.com (Wesley Chun)'
 
 from datetime import datetime
 
 import endpoints
+
 from protorpc import messages, message_types, remote
 
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from models import ConflictException
-from models import ConferenceSessionForms, ConferenceSessionForm, ConferenceSession
-from models import Speaker, SpeakerForm
-from models import Profile, ProfileMiniForm, ProfileForm
-from models import StringMessage, BooleanMessage
-from models import Conference, ConferenceForm, ConferenceForms, ConferenceQueryForms
-from models import TeeShirtSize
+from models.models import ConflictException, StringMessage, BooleanMessage
+from models.conferenceSession import ConferenceSessionForms, ConferenceSessionForm, ConferenceSession
+from models.speaker import Speaker, SpeakerForm
+from models.profile import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
+from models.conference import Conference, ConferenceForm, ConferenceForms, ConferenceQueryForms
 
 from settings import WEB_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID, ANDROID_AUDIENCE
 
@@ -602,6 +600,9 @@ class ConferenceApi(remote.Service):
 
         return ConferenceSessionForms(
             items=[self._copyConferenceSessionToForm(session) for session in sessions])
+
+        # TODO: getSessionsBySpeaker(speaker)
+        # TODO: getConferenceSessionsByType(websafeConferenceKey, typeOfSession)
 
 
 api = endpoints.api_server([ConferenceApi])  # register API
