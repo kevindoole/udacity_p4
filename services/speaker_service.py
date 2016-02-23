@@ -8,10 +8,9 @@ from google.appengine.ext import ndb
 class SpeakerService(BaseService):
     @staticmethod
     def find_or_create(email):
-        speaker_key = ndb.Key(Speaker, email)
-        if speaker_key.get() is None:
-            speaker_key = Speaker(email=email).put().urlsafe()
-        else:
-            speaker_key = speaker_key.get().urlsafe()
+        speaker = Speaker.query(Speaker.email == email).get()
 
-        return speaker_key
+        if speaker is not None:
+            return speaker.key.urlsafe()
+        else:
+            return Speaker(email=email).put().urlsafe()

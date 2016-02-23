@@ -29,7 +29,7 @@ from models.conference import Conference, ConferenceForm, ConferenceForms, Confe
 
 from settings import WEB_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID, ANDROID_AUDIENCE
 
-from utils import getUserId
+from utils import Auth
 
 from services.session_service import SessionService
 
@@ -65,12 +65,12 @@ FIELDS = {
 
 CONF_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
-    websafeConferenceKey=messages.StringField(1),
+    websafeConferenceKey=messages.StringField(1, required=True),
 )
 
 CONF_POST_REQUEST = endpoints.ResourceContainer(
     ConferenceForm,
-    websafeConferenceKey=messages.StringField(1),
+    websafeConferenceKey=messages.StringField(1, required=True),
 )
 
 
@@ -85,6 +85,7 @@ class ConferenceApi(remote.Service):
 
     def __init__(self):
         self.session_service = SessionService()
+        self.auth = Auth()
 
     # - - - Conference objects - - - - - - - - - - - - - - - - -
 
@@ -111,7 +112,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = getUserId(user)
+        user_id = self.auth.getUserId(user)
 
         if not request.name:
             raise endpoints.BadRequestException("Conference 'name' field required")
@@ -161,7 +162,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = getUserId(user)
+        user_id = self.auth.getUserId(user)
 
         # copy ConferenceForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
@@ -231,7 +232,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = getUserId(user)
+        user_id = self.auth.getUserId(user)
 
         # create ancestor query for all key matches for this user
         confs = Conference.query(ancestor=ndb.Key(Profile, user_id))
@@ -335,7 +336,7 @@ class ConferenceApi(remote.Service):
             raise endpoints.UnauthorizedException('Authorization required')
 
         # get Profile from datastore
-        user_id = getUserId(user)
+        user_id = self.auth.getUserId(user)
         p_key = ndb.Key(Profile, user_id)
         profile = p_key.get()
         # create new Profile if not there
@@ -526,15 +527,20 @@ class ConferenceApi(remote.Service):
                       http_method='POST', name='createConferenceSession')
     def createConferenceSession(self, request):
         """Create new conference session."""
-        # TODO: Add service tests
-        return self.session_service.create_session(request)
+        user = endpoints.get_current_user()
+        # TODO: Only the owner should be able to add sessions
+
+        if not user:
+            raise endpoints.UnauthorizedException('Authorization required')
+
+        return self.session_service.create_session(request, user)
 
     @endpoints.method(CONF_GET_REQUEST, ConferenceSessionForms,
                       path='conference/{websafeConferenceKey}/sessions',
                       http_method='GET', name='getConferenceSessions')
     def getConferenceSessions(self, request):
-        # TODO: Add service tests
-        return self.session_service.get_conference_sessions(request)
+        return self.session_service.get_conference_sessions(
+            request.websafeConferenceKey)
 
     # TODO: getSessionsBySpeaker(speaker)
     # TODO: getConferenceSessionsByType(websafeConferenceKey, typeOfSession)
