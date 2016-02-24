@@ -1,8 +1,5 @@
-import endpoints
-
 from models.speaker import Speaker
 from services.base_service import BaseService
-from google.appengine.ext import ndb
 
 
 class SpeakerService(BaseService):

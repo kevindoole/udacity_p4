@@ -7,7 +7,7 @@ class ConferenceSession(ndb.Model):
     title = ndb.StringProperty(required=True)
     highlights = ndb.TextProperty()
     websafeConferenceKey = ndb.StringProperty()
-    speakerKeys = ndb.TextProperty(repeated=True)
+    speakerKeys = ndb.TextProperty(repeated=True, indexed=True)
     duration = ndb.IntegerProperty()
     typeOfSession = ndb.StringProperty()
     date = ndb.DateProperty(required=True)

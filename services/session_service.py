@@ -5,7 +5,6 @@ from google.appengine.ext import ndb
 
 from models.conference_session import ConferenceSession, ConferenceSessionForms, \
     ConferenceSessionForm
-from models.profile import Profile
 from services.speaker_service import SpeakerService
 from services.base_service import BaseService
 from utils import Auth
@@ -32,13 +31,8 @@ class SessionService(BaseService):
         c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
         conf = c_key.get()
 
-        owner_id = conf.organizerUserId
-        user_id = self.auth.getUserId(user)
-        if user_id != owner_id:
-            raise endpoints.BadRequestException("You must be the conference "
-                                                "organizer to add sessions")
+        self.check_owner(conf, user)
 
-        # copy SessionForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name)
                 for field in request.all_fields()}
 
@@ -59,14 +53,28 @@ class SessionService(BaseService):
         s_key = ndb.Key(ConferenceSession, s_id, parent=c_key)
         data['key'] = s_key
 
-        # create ConferenceSession
         ConferenceSession(**data).put()
 
         return request
 
+    def check_owner(self, conf, user):
+        owner_id = conf.organizerUserId
+        user_id = self.auth.getUserId(user)
+        if user_id != owner_id:
+            raise endpoints.BadRequestException("You must be the conference "
+                                                "organizer to add sessions")
+
     def get_conference_sessions(self, websafeConferenceKey):
         sessions = ConferenceSession.query(
             ConferenceSession.websafeConferenceKey == websafeConferenceKey).fetch()
+
+        return ConferenceSessionForms(
+            items=[self.copy_entity_to_form(
+                ConferenceSessionForm(), session) for session in sessions])
+
+    def get_speaker_sessions(self, websafe_speaker_key):
+        sessions = ConferenceSession.query(
+            ConferenceSession.speakerKeys == websafe_speaker_key).fetch()
 
         return ConferenceSessionForms(
             items=[self.copy_entity_to_form(
