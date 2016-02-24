@@ -105,6 +105,32 @@ class TestSessionService(ServiceTestCase):
         sessions = session_service.get_conference_sessions(conf_id)
         self.assertEqual(2, len(sessions.items))
 
+    def test_it_can_get_sessions_by_conf_id_and_type(self):
+        session_service = SessionService()
+
+        conf_id = Conference(name="a conference").put().urlsafe()
+        ConferenceSession(
+            title='This is the title',
+            date=datetime.date(2016, 12, 12),
+            highlights="blah blah ha",
+            startTime=datetime.time(13, 15),
+            websafeConferenceKey=conf_id,
+            duration=12,
+            typeOfSession='dance'
+        ).put().urlsafe()
+        ConferenceSession(
+            title='This is the other title',
+            date=datetime.date(2017, 12, 12),
+            highlights="blah hahahaha blah ha",
+            startTime=datetime.time(23, 32),
+            websafeConferenceKey=conf_id,
+            duration=1,
+            typeOfSession='snails'
+        ).put().urlsafe()
+
+        sessions = session_service.get_conference_sessions_by_type(conf_id, 'dance')
+        self.assertEqual(1, len(sessions.items))
+
     def test_it_can_find_speaker_sessions(self):
         # Make two sessions by the same speaker at 2 separate conferences.
         websafe_speaker_key = SpeakerService.find_or_create('test@mail.com')

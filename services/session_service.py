@@ -79,3 +79,13 @@ class SessionService(BaseService):
         return ConferenceSessionForms(
             items=[self.copy_entity_to_form(
                 ConferenceSessionForm(), session) for session in sessions])
+
+    def get_conference_sessions_by_type(self, websafeConferenceKey,
+                                        sessionType):
+        sessions = ConferenceSession.query(
+            ConferenceSession.websafeConferenceKey == websafeConferenceKey,
+            ConferenceSession.typeOfSession == sessionType).fetch()
+
+        return ConferenceSessionForms(
+            items=[self.copy_entity_to_form(
+                ConferenceSessionForm(), session) for session in sessions])
