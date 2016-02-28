@@ -42,10 +42,14 @@ class WishlistService(BaseService):
         return wl_k
 
     def add_session_to_wishlist(self, websafe_session_key, user):
-        # TODO: The same session can be added multiple times
         wl_key = self.get_wishlist_key(user)
 
         wishlist = wl_key.get()
+
+        if websafe_session_key in wishlist.sessionKeys:
+            raise ConflictException(
+                "You already have this session in your wishlist.")
+
         wishlist.sessionKeys.append(websafe_session_key)
         wishlist.put()
 
@@ -55,6 +59,10 @@ class WishlistService(BaseService):
         wishlist = self.get_wishlist_key(user).get()
         if wishlist is None or wishlist.sessionKeys is []:
             raise ConflictException("This session is not in your wishlist.")
+
+        if websafe_session_key not in wishlist.sessionKeys:
+            raise ConflictException(
+                "This session is not in your wishlist.")
 
         wishlist.sessionKeys.remove(websafe_session_key)
         wishlist.put()
