@@ -7,7 +7,7 @@ from google.appengine.ext import ndb
 from models.conference import Conference, ConferenceForm
 from models.profile import Profile
 from services.base_service import BaseService
-from utils import Auth
+from support.Auth import Auth
 
 DEFAULTS = {"city": "Default City", "maxAttendees": 0, "seatsAvailable": 0,
             "topics": ["Default", "Topic"]}

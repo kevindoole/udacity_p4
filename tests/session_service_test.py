@@ -7,11 +7,10 @@ from mock import MagicMock
 from models.conference import Conference
 from models.conference_session import ConferenceSessionForm, ConferenceSession
 from models.profile import Profile
-from models.speaker import Speaker
-from services.session_service import SessionService
 from service_test_case import ServiceTestCase
+from services.session_service import SessionService
 from services.speaker_service import SpeakerService
-from utils import Auth
+from support.Auth import Auth
 
 
 class TestSessionService(ServiceTestCase):

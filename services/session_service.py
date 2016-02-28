@@ -5,9 +5,9 @@ from google.appengine.ext import ndb
 
 from models.conference_session import ConferenceSession, ConferenceSessionForms
 from models.conference_session import ConferenceSessionForm
-from services.speaker_service import SpeakerService
 from services.base_service import BaseService
-from utils import Auth
+from services.speaker_service import SpeakerService
+from support.Auth import Auth
 
 
 class SessionService(BaseService):
@@ -24,11 +24,11 @@ class SessionService(BaseService):
         Returns:
              SessionForm
         """
-        speaker_keys = getattr(entity, 'speakerKeys')
+        speaker_keys = entity.speakerKeys
         if speaker_keys is not None:
             speaker_emails = [ndb.Key(urlsafe=key).get().email for key in
                               speaker_keys]
-            setattr(form, 'speakerEmails', speaker_emails)
+            form.speakerEmails = speaker_emails
 
         return super(SessionService, self).copy_entity_to_form(form, entity)
 
