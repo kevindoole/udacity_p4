@@ -39,7 +39,7 @@ class TestSessionService(ServiceTestCase):
                 request.all_fields()}
 
         session_service = SessionService(auth=auth)
-        session_service.create_session(request, profile)
+        session_service.create_conference_session(request, profile)
 
         self.assertEqual(1, len(ConferenceSession.query().fetch(2)))
 
@@ -77,7 +77,7 @@ class TestSessionService(ServiceTestCase):
         session_service = SessionService(auth=auth)
         self.assertRaises(
             endpoints.BadRequestException,
-            session_service.create_session, request, profile)
+            session_service.create_conference_session, request, profile)
 
     def test_it_can_get_conference_sessions_by_conference_id(self):
         session_service = SessionService()

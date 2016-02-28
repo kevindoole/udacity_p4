@@ -1,4 +1,4 @@
-from models.speaker import Speaker
+from models.speaker import Speaker, SpeakerForm, SpeakerForms
 from services.base_service import BaseService
 
 
@@ -11,3 +11,10 @@ class SpeakerService(BaseService):
             return speaker.key.urlsafe()
         else:
             return Speaker(email=email).put().urlsafe()
+
+    def get_speakers(self):
+        speakers = Speaker.query().fetch()
+
+        return SpeakerForms(
+            items=[self.copy_entity_to_form(
+                SpeakerForm(), speaker) for speaker in speakers])

@@ -3,8 +3,8 @@ from datetime import datetime
 import endpoints
 from google.appengine.ext import ndb
 
-from models.conference_session import ConferenceSession, ConferenceSessionForms, \
-    ConferenceSessionForm
+from models.conference_session import ConferenceSession, ConferenceSessionForms
+from models.conference_session import ConferenceSessionForm
 from services.speaker_service import SpeakerService
 from services.base_service import BaseService
 from utils import Auth
@@ -14,8 +14,37 @@ class SessionService(BaseService):
     def __init__(self, auth=None):
         self.auth = auth if auth is not None else Auth()
 
-    def create_session(self, request, user):
-        """Create or update Session object, returning SessionForm/request."""
+    def copy_entity_to_form(self, form, entity):
+        """Copies a Session entity to a SessionForm.
+
+        Args:
+            form (SessionForm)
+            entity (Session)
+
+        Returns:
+             SessionForm
+        """
+        speaker_keys = getattr(entity, 'speakerKeys')
+        if speaker_keys is not None:
+            speaker_emails = [ndb.Key(urlsafe=key).get().email for key in
+                              speaker_keys]
+            setattr(form, 'speakerEmails', speaker_emails)
+
+        return super(SessionService, self).copy_entity_to_form(form, entity)
+
+    def create_conference_session(self, request, user):
+        """Create or update Session object, returning SessionForm/request.
+
+        Args:
+            request (ConferenceSessionForm)
+            user (User)
+
+        Returns:
+            ConferenceSessionForm
+
+        Raises:
+            endpoints.BadRequestException
+        """
 
         if not request.title:
             raise endpoints.BadRequestException(
@@ -33,13 +62,12 @@ class SessionService(BaseService):
 
         self.check_owner(conf, user)
 
-        data = {field.name: getattr(request, field.name)
-                for field in request.all_fields()}
+        data = {field.name: getattr(request, field.name) for field in
+                request.all_fields()}
 
         if request.speakerEmails:
-            data['speakerKeys'] = [
-                SpeakerService.find_or_create(email)
-                for email in request.speakerEmails]
+            data['speakerKeys'] = [SpeakerService.find_or_create(email) for
+                                   email in request.speakerEmails]
 
         del data['speakerEmails']
         # TODO: Enable speaker entities to be updated
@@ -64,28 +92,44 @@ class SessionService(BaseService):
             raise endpoints.BadRequestException("You must be the conference "
                                                 "organizer to add sessions")
 
-    def get_conference_sessions(self, websafeConferenceKey):
+    def get_conference_sessions(self, websafe_conference_key):
+        """Gets all the sessions associated with a conference.
+
+        Args:
+            websafe_conference_key (string)
+        Returns:
+            ConferenceSessionForms
+        """
         sessions = ConferenceSession.query(
-            ConferenceSession.websafeConferenceKey == websafeConferenceKey).fetch()
+            ConferenceSession.websafeConferenceKey ==
+            websafe_conference_key).fetch()
 
         return ConferenceSessionForms(
-            items=[self.copy_entity_to_form(
-                ConferenceSessionForm(), session) for session in sessions])
+            items=[self.copy_entity_to_form(ConferenceSessionForm(), session)
+                   for session in sessions])
 
     def get_speaker_sessions(self, websafe_speaker_key):
+        """Gets a list of sessions featuring this speaker.
+
+        Args:
+             websafe_speaker_key (string)
+
+        Returns:
+            ConferenceSessionForms
+        """
         sessions = ConferenceSession.query(
             ConferenceSession.speakerKeys == websafe_speaker_key).fetch()
 
         return ConferenceSessionForms(
-            items=[self.copy_entity_to_form(
-                ConferenceSessionForm(), session) for session in sessions])
+            items=[self.copy_entity_to_form(ConferenceSessionForm(), session)
+                   for session in sessions])
 
-    def get_conference_sessions_by_type(self, websafeConferenceKey,
-                                        sessionType):
-        sessions = ConferenceSession.query(
-            ConferenceSession.websafeConferenceKey == websafeConferenceKey,
-            ConferenceSession.typeOfSession == sessionType).fetch()
+    def get_conference_sessions_by_type(self, websafe_conference_key,
+                                        session_type):
+        sessions = ConferenceSession.query(ndb.AND(
+            ConferenceSession.websafeConferenceKey == websafe_conference_key,
+            ConferenceSession.typeOfSession == session_type)).fetch()
 
         return ConferenceSessionForms(
-            items=[self.copy_entity_to_form(
-                ConferenceSessionForm(), session) for session in sessions])
+            items=[self.copy_entity_to_form(ConferenceSessionForm(), session)
+                   for session in sessions])
