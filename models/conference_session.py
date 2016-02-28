@@ -24,6 +24,7 @@ class ConferenceSessionForm(messages.Message):
     date = messages.StringField(6)
     startTime = messages.StringField(7)
     websafeConferenceKey = messages.StringField(8)
+    websafeSessionKey = messages.StringField(9)
 
 
 class ConferenceSessionForms(messages.Message):

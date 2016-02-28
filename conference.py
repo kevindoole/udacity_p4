@@ -23,9 +23,11 @@ from models.conference_session import ConferenceSessionForms, \
 from models.models import ConflictException, StringMessage, BooleanMessage
 from models.profile import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
 from models.speaker import SpeakerForms
+from models.wishlist import WishlistForm
 from services.conference_service import ConferenceService
 from services.session_service import SessionService
 from services.speaker_service import SpeakerService
+from services.wishlist_service import WishlistService
 from settings import WEB_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID, \
     ANDROID_AUDIENCE
 from support.AppliesFilters import AppliesFilters
@@ -57,6 +59,10 @@ CONF_SPEAKER_GET_REQUEST = endpoints.ResourceContainer(
     websafeSpeakerKey=messages.StringField(1, required=True)
 )
 
+WISHLIST_POST_REQUEST = endpoints.ResourceContainer(
+    websafeSessionKey=messages.StringField(1, required=True)
+)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -72,6 +78,7 @@ class ConferenceApi(remote.Service):
         self.session_service = SessionService()
         self.speaker_service = SpeakerService()
         self.conference_service = ConferenceService()
+        self.wishlist_service = WishlistService()
         self.auth = Auth()
 
     # - - - Conference objects - - - - - - - - - - - - - - - - -
@@ -317,7 +324,8 @@ class ConferenceApi(remote.Service):
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
 
-        return self.session_service.create_conference_session(request, user)
+        self.session_service.create_conference_session(request, user)
+        return request
 
     @endpoints.method(CONF_GET_REQUEST, ConferenceSessionForms,
                       path='conference/{websafeConferenceKey}/sessions',
@@ -347,5 +355,25 @@ class ConferenceApi(remote.Service):
         """Return a list of all speakers."""
         return self.speaker_service.get_speakers()
 
+    @endpoints.method(WISHLIST_POST_REQUEST, WishlistForm, path='wishlist',
+                      http_method='POST', name='addToMyWishlist')
+    def add_session_to_wishlist(self, request):
+        """Return a list of all speakers."""
+        return self.wishlist_service.add_session_to_wishlist(
+            request.websafeSessionKey, endpoints.get_current_user())
+
+    @endpoints.method(WISHLIST_POST_REQUEST, WishlistForm, path='wishlist',
+                      http_method='DELETE', name='removeFromMyWishlist')
+    def remove_session_from_wishlist(self, request):
+        """Return a list of all speakers."""
+        return self.wishlist_service.remove_session_from_wishlist(
+            request.websafeSessionKey, endpoints.get_current_user())
+
+    @endpoints.method(message_types.VoidMessage, ConferenceSessionForms,
+                      path='wishlist', http_method='GET',
+                      name='getSessionsInWishlist')
+    def get_sessions_in_wishlist(self, request):
+        user = endpoints.get_current_user()
+        return self.wishlist_service.get_sessions_in_wishlist(user)
 
 api = endpoints.api_server([ConferenceApi])  # register API

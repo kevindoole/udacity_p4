@@ -30,6 +30,8 @@ class SessionService(BaseService):
                               speaker_keys]
             form.speakerEmails = speaker_emails
 
+        form.websafeSessionKey = entity.key.urlsafe()
+
         return super(SessionService, self).copy_entity_to_form(form, entity)
 
     def create_conference_session(self, request, user):
@@ -40,7 +42,7 @@ class SessionService(BaseService):
             user (User)
 
         Returns:
-            ConferenceSessionForm
+            string
 
         Raises:
             endpoints.BadRequestException
@@ -60,6 +62,7 @@ class SessionService(BaseService):
         c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
         conf = c_key.get()
 
+        # TODO: This should be in the client
         self.check_owner(conf, user)
 
         data = {field.name: getattr(request, field.name) for field in
@@ -72,6 +75,8 @@ class SessionService(BaseService):
         del data['speakerEmails']
         # TODO: Enable speaker entities to be updated
 
+        del data['websafeSessionKey']
+
         # convert dates from strings to Date objects;
         # set month based on start_date
         data['date'] = datetime.strptime(data['date'], "%Y-%m-%d").date()
@@ -81,9 +86,9 @@ class SessionService(BaseService):
         s_key = ndb.Key(ConferenceSession, s_id, parent=c_key)
         data['key'] = s_key
 
-        ConferenceSession(**data).put()
+        sess = ConferenceSession(**data).put()
 
-        return request
+        return sess.urlsafe()
 
     def check_owner(self, conf, user):
         owner_id = conf.organizerUserId

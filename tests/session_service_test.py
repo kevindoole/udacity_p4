@@ -2,7 +2,6 @@ import datetime
 
 import endpoints
 from google.appengine.ext import ndb
-from mock import MagicMock
 
 from models.conference import Conference
 from models.conference_session import ConferenceSessionForm, ConferenceSession
@@ -10,16 +9,12 @@ from models.profile import Profile
 from service_test_case import ServiceTestCase
 from services.session_service import SessionService
 from services.speaker_service import SpeakerService
-from support.Auth import Auth
 
 
 class TestSessionService(ServiceTestCase):
     def test_it_can_create_sessions(self):
         p_key = ndb.Key(Profile, 'kdoole@gmail.com')
         profile = Profile(mainEmail='kdoole@gmail.com', key=p_key).put()
-
-        auth = Auth()
-        auth.getUserId = MagicMock(return_value=unicode('kdoole@gmail.com'))
 
         conf_id = Conference(name="a conference",
                              organizerUserId='kdoole@gmail.com',
@@ -37,6 +32,7 @@ class TestSessionService(ServiceTestCase):
         data = {field.name: getattr(request, field.name) for field in
                 request.all_fields()}
 
+        auth = self.mock_auth('kdoole@gmail.com')
         session_service = SessionService(auth=auth)
         session_service.create_conference_session(request, profile)
 
@@ -56,16 +52,10 @@ class TestSessionService(ServiceTestCase):
         self.assertEquals(speaker.email, 'test@mail.com')
 
     def test_only_owners_can_create_sessions(self):
-        p_key = ndb.Key(Profile, 'kdoole@gmail.com')
-        profile = Profile(mainEmail='kdoole@gmail.com', key=p_key).put()
+        auth = self.mock_auth('not.an.owner@hacker.com')
 
-        auth = Auth()
-        auth.getUserId = MagicMock(
-            return_value=unicode('not.an.owner@hacker.com'))
-
-        conf_id = Conference(name="a conference",
-                             organizerUserId='kdoole@gmail.com',
-                             parent=p_key).put().urlsafe()
+        conf_id, profile = self.make_conference(conf_name='a conference',
+                                                email='kdoole@gmail.com')
         request = ConferenceSessionForm(
             title='This is the title',
             date="2016-12-12",
