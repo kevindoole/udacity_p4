@@ -45,13 +45,52 @@ On the API side, in addition to the requested endpoints
 getSessionsBySpeaker), we also have getSpeakers, which helps us find
 urlsafe speaker keys, to use with getSessionsBySpeaker.
 
+## Task 3: Additional queries
+
+Task 3 asks for 2 additional queries to be created. I found the wishlist
+to be a feature of particular value to conference-goers. This segment
+of the potential consumer of this API seemed valuable, so I aimed to
+create some features around wishlists. I added these endpoints:
+
+- getSessionsByWishlistSpeakers: gets other sessions (from any
+conference) that speakers in the user's wishlist are involved in
+- getSessionsByWishlistTopics: gets other conferences with topics that
+are found in the user's wishlist
+
+## Task 3: Querying for specific sets of sessions
+
+Task 3 asks the questions, "How would you handle a query for all
+non-workshop sessions before 7 pm? What is the problem for implementing
+this query? What ways to solve it did you think of?"
+
+### Problem
+
+For scalability and performance, Datastore has some limitations on
+queries. From the App Engine docs, "To avoid having to scan the entire
+index, the query mechanism relies on all of a query's potential results
+being adjacent to one another in the index." So a single query cannot
+use inequality comparisons on more than one property. For example,
+querying for `startTime < 7pm` and `sessionType != workshop` is not
+valid.
+
+### Solution
+
+One solution to this problem would be to create a Datastore kind called
+SessionType, which ConferenceSessions would descend from. In this way,
+it would be possible to query for conference sessions where the
+descendant is a particular session type, and the time is before 7pm.
+
+Another option is to query for all sessions at a particular time, and
+then apply the type filter programatically after all records have been
+retrieved from Datastore. This solution is not as scalable, but a little
+easier to complete.
+
+If I needed to maintain this project beyond the date when I submit it 
+for review, I would most definitely opt for creating a kind. Because I 
+don't need to maintain it, I'll go with the easier option, filtering 
+results programmatically. See `getSessionsByTypeAndTime`.
+
+
 rubric: https://docs.google.com/document/d/1lVFoZDY-jjg6SoI8g5uZ72V3TDp7iLTz2UGWAI5ZvfE/pub
 https://docs.google.com/document/d/1H9anIDV4QCPttiQEwpGe6MnMBx92XCOlz0B4ciD7lOs/pub
 https://www.udacity.com/course/viewer#!/c-nd004/l-3566359178/m-3636408594
-
-
-
-task 3:
-2 additioal queries:
-- get other conferences or sessions that speakers in the user's wishlist are involved in
-- get other sessions on the same topic as are in the user's wishlist

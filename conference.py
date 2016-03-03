@@ -45,6 +45,11 @@ DEFAULTS = {"city": "Default City", "maxAttendees": 0, "seatsAvailable": 0,
 
 CONF_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
+    websafeConferenceKey=messages.StringField(1, required=True)
+)
+
+CONF_SESSION_GET_REQUEST = endpoints.ResourceContainer(
+    message_types.VoidMessage,
     websafeConferenceKey=messages.StringField(1, required=True),
     sessionType=messages.StringField(2)
 )
@@ -60,6 +65,7 @@ CONF_SPEAKER_GET_REQUEST = endpoints.ResourceContainer(
 )
 
 WISHLIST_POST_REQUEST = endpoints.ResourceContainer(
+    message_types.VoidMessage,
     websafeSessionKey=messages.StringField(1, required=True)
 )
 
@@ -341,7 +347,7 @@ class ConferenceApi(remote.Service):
         return self.session_service.get_speaker_sessions(
             request.websafeSpeakerKey)
 
-    @endpoints.method(CONF_GET_REQUEST, ConferenceSessionForms,
+    @endpoints.method(CONF_SESSION_GET_REQUEST, ConferenceSessionForms,
                       path='conference/{websafeConferenceKey}/sessions/{'
                            'sessionType}', http_method='GET',
                       name='getSessionsByType')

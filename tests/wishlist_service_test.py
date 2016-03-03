@@ -39,9 +39,6 @@ class TestWishlistService(ServiceTestCase):
         sessions = wishlist_service.get_sessions_in_wishlist(user)
         self.assertEquals('This is the title', sessions.items[0].title)
 
-    def test_it_will_not_add_the_same_key_twice(self):
-
-
     def make_conference_and_session(self):
         email = 'kdoole@gmail.com'
         self.loginUser(email)
