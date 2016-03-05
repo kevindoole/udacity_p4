@@ -19,12 +19,13 @@ from protorpc import messages, message_types, remote
 from models.conference import Conference, ConferenceForm, ConferenceForms, \
     ConferenceQueryForms
 from models.conference_session import ConferenceSessionForms, \
-    ConferenceSessionForm
+    ConferenceSessionForm, ConferenceSessionQueryForms
 from models.models import ConflictException, StringMessage, BooleanMessage
 from models.profile import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
 from models.speaker import SpeakerForms
 from models.wishlist import WishlistForm
 from services.conference_service import ConferenceService
+from services.profile_service import ProfileService
 from services.session_service import SessionService
 from services.speaker_service import SpeakerService
 from services.wishlist_service import WishlistService
@@ -85,6 +86,7 @@ class ConferenceApi(remote.Service):
         self.speaker_service = SpeakerService()
         self.conference_service = ConferenceService()
         self.wishlist_service = WishlistService()
+        self.profile_service = ProfileService()
         self.auth = Auth()
 
     # - - - Conference objects - - - - - - - - - - - - - - - - -
@@ -145,8 +147,13 @@ class ConferenceApi(remote.Service):
                       name='queryConferences')
     def query_conferences(self, request):
         """Query for conferences."""
-        filter_maker = AppliesFilters()
-        conferences = filter_maker.get_query(request)
+        filter_maker = AppliesFilters(
+            Conference,
+            ["month", "maxAttendees"],
+            {'CITY': 'city', 'TOPIC': 'topics',
+             'MONTH': 'month',
+             'MAX_ATTENDEES': 'maxAttendees'})
+        conferences = filter_maker.get_query(request.filters)
 
         # need to fetch organiser displayName from profiles
         # get all keys and use get_multi for speed
@@ -355,6 +362,14 @@ class ConferenceApi(remote.Service):
         return self.session_service.get_conference_sessions_by_type(
             request.websafeConferenceKey, request.sessionType)
 
+    @endpoints.method(ConferenceSessionQueryForms, ConferenceSessionForms,
+                      path='query-sessions', http_method='POST',
+                      name='getSessionsByTypeAndFilters')
+    def get_sessions_by_type_and_filters(self, request):
+        return self.session_service.get_sessions_by_type_and_filters(
+            request.websafeConferenceKey,
+            request.typeOfSession, request.filters)
+
     @endpoints.method(message_types.VoidMessage, SpeakerForms, path='speakers',
                       http_method='GET', name='getSpeakers')
     def get_speakers(self, request):
@@ -381,5 +396,6 @@ class ConferenceApi(remote.Service):
     def get_sessions_in_wishlist(self, request):
         user = endpoints.get_current_user()
         return self.wishlist_service.get_sessions_in_wishlist(user)
+
 
 api = endpoints.api_server([ConferenceApi])  # register API

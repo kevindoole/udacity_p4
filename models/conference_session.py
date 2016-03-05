@@ -30,3 +30,19 @@ class ConferenceSessionForm(messages.Message):
 class ConferenceSessionForms(messages.Message):
     """SessionForms -- multiple Session outbound form message"""
     items = messages.MessageField(ConferenceSessionForm, 1, repeated=True)
+
+
+class ConferenceSessionQueryForm(messages.Message):
+    """ConferenceQueryForm -- Conference query inbound form message"""
+    field = messages.StringField(1)
+    operator = messages.StringField(2)
+    value = messages.StringField(3)
+
+
+class ConferenceSessionQueryForms(messages.Message):
+    """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form
+    message"""
+    filters = messages.MessageField(ConferenceSessionQueryForm, 1,
+                                    repeated=True)
+    typeOfSession = messages.StringField(2, required=True)
+    websafeConferenceKey = messages.StringField(3)

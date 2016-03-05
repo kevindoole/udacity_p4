@@ -1,30 +1,36 @@
 import endpoints
 from google.appengine.ext import ndb
 
-from models.conference import Conference
-
 OPERATORS = {'EQ': '=', 'GT': '>', 'GTEQ': '>=', 'LT': '<', 'LTEQ': '<=',
              'NE': '!='}
 
-FIELDS = {'CITY': 'city', 'TOPIC': 'topics', 'MONTH': 'month',
-          'MAX_ATTENDEES': 'maxAttendees'}
-
 
 class AppliesFilters(object):
-    def get_query(self, request):
+    def __init__(self, kind, int_values, fields):
+        self.kind = kind
+        self.int_values = int_values
+        self.fields = fields
+
+    def get_query(self, filters, order_by_field='name',
+                  websafe_conference_key=None):
         """Return formatted query from the submitted filters."""
-        q = Conference.query()
-        inequality_filter, filters = self.format_filters(request.filters)
+        if websafe_conference_key:
+            q = self.kind.query(
+                self.kind.websafeConferenceKey == websafe_conference_key)
+        else:
+            q = self.kind.query()
+
+        inequality_filter, filters = self.format_filters(filters)
 
         # If exists, sort on inequality filter first
         if not inequality_filter:
-            q = q.order(Conference.name)
+            q = q.order(getattr(self.kind, order_by_field))
         else:
             q = q.order(ndb.GenericProperty(inequality_filter))
-            q = q.order(Conference.name)
+            q = q.order(getattr(self.kind, order_by_field))
 
         for filtr in filters:
-            if filtr["field"] in ["month", "maxAttendees"]:
+            if filtr["field"] in self.int_values:
                 filtr["value"] = int(filtr["value"])
             formatted_query = ndb.query.FilterNode(filtr["field"],
                                                    filtr["operator"],
@@ -42,7 +48,7 @@ class AppliesFilters(object):
                      f.all_fields()}
 
             try:
-                filtr["field"] = FIELDS[filtr["field"]]
+                filtr["field"] = self.fields[filtr["field"]]
                 filtr["operator"] = OPERATORS[filtr["operator"]]
             except KeyError:
                 raise endpoints.BadRequestException(

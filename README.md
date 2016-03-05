@@ -88,7 +88,7 @@ easier to complete.
 If I needed to maintain this project beyond the date when I submit it 
 for review, I would most definitely opt for creating a kind. Because I 
 don't need to maintain it, I'll go with the easier option, filtering 
-results programmatically. See `getSessionsByTypeAndTime`.
+results programmatically. See `getSessionsByTypeAndFilters`.
 
 
 rubric: https://docs.google.com/document/d/1lVFoZDY-jjg6SoI8g5uZ72V3TDp7iLTz2UGWAI5ZvfE/pub

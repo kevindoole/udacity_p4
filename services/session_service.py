@@ -7,6 +7,7 @@ from models.conference_session import ConferenceSession, ConferenceSessionForms
 from models.conference_session import ConferenceSessionForm
 from services.base_service import BaseService
 from services.speaker_service import SpeakerService
+from support.AppliesFilters import AppliesFilters
 from support.Auth import Auth
 
 
@@ -138,3 +139,23 @@ class SessionService(BaseService):
         return ConferenceSessionForms(
             items=[self.copy_entity_to_form(ConferenceSessionForm(), session)
                    for session in sessions])
+
+    def get_sessions_by_type_and_filters(self, websafe_conference_key,
+                                         session_type, filters):
+
+        if filters:
+            filter_maker = AppliesFilters(ConferenceSession, [],
+                                          {'TITLE': 'title',
+                                           'DURATION': 'duration',
+                                           'DATE': 'date',
+                                           'START_TIME': 'startTime'})
+            sessions = filter_maker.get_query(
+                filters, 'title', websafe_conference_key)
+        else:
+            sessions = ConferenceSession.query(
+                ConferenceSession.websafeConferenceKey == websafe_conference_key
+            ).fetch()
+
+        return ConferenceSessionForms(
+            items=[self.copy_entity_to_form(ConferenceSessionForm(), s)
+                   for s in sessions if s.typeOfSession == unicode(session_type)])
