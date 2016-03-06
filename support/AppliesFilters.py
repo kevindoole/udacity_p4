@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import endpoints
 from google.appengine.ext import ndb
 
@@ -6,9 +8,11 @@ OPERATORS = {'EQ': '=', 'GT': '>', 'GTEQ': '>=', 'LT': '<', 'LTEQ': '<=',
 
 
 class AppliesFilters(object):
-    def __init__(self, kind, int_values, fields):
+    def __init__(self, kind, field_types, fields):
         self.kind = kind
-        self.int_values = int_values
+        self.int_values = field_types.get('int', [])
+        self.date_values = field_types.get('date', [])
+        self.time_values = field_types.get('time', [])
         self.fields = fields
 
     def get_query(self, filters, order_by_field='name',
@@ -32,6 +36,14 @@ class AppliesFilters(object):
         for filtr in filters:
             if filtr["field"] in self.int_values:
                 filtr["value"] = int(filtr["value"])
+            if filtr["field"] in self.date_values:
+                filtr["value"] = datetime.strptime(
+                    filtr["value"], "%Y-%m-%d").date()
+            if filtr["field"] in self.time_values:
+                filtr["value"] = datetime.strptime(
+                    filtr["value"], "%H:%M").time()
+                # TODO: It cannot filter by datetime.time.
+                # perhaps store just hour
             formatted_query = ndb.query.FilterNode(filtr["field"],
                                                    filtr["operator"],
                                                    filtr["value"])

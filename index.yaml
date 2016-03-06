@@ -97,5 +97,11 @@ indexes:
 
 - kind: ConferenceSession
   properties:
+  - name: startTime
+  - name: websafeConferenceKey
+  - name: title
+
+- kind: ConferenceSession
+  properties:
   - name: title
   - name: name

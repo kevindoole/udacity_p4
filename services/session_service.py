@@ -144,13 +144,17 @@ class SessionService(BaseService):
                                          session_type, filters):
 
         if filters:
-            filter_maker = AppliesFilters(ConferenceSession, [],
-                                          {'TITLE': 'title',
-                                           'DURATION': 'duration',
-                                           'DATE': 'date',
-                                           'START_TIME': 'startTime'})
+            filter_maker = AppliesFilters(
+                ConferenceSession,
+                {'date': ['date'],
+                 'time': ['startTime'],
+                 'int': ['duration']},
+                {'TITLE': 'title',
+                 'DURATION': 'duration',
+                 'DATE': 'date',
+                 'START_TIME': 'startTime'})
             sessions = filter_maker.get_query(
-                filters, 'title', websafe_conference_key)
+                filters, 'title', websafe_conference_key).fetch()
         else:
             sessions = ConferenceSession.query(
                 ConferenceSession.websafeConferenceKey == websafe_conference_key
@@ -158,4 +162,5 @@ class SessionService(BaseService):
 
         return ConferenceSessionForms(
             items=[self.copy_entity_to_form(ConferenceSessionForm(), s)
-                   for s in sessions if s.typeOfSession == unicode(session_type)])
+                   for s in sessions if
+                   s.typeOfSession == unicode(session_type)])

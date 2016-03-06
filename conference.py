@@ -149,7 +149,7 @@ class ConferenceApi(remote.Service):
         """Query for conferences."""
         filter_maker = AppliesFilters(
             Conference,
-            ["month", "maxAttendees"],
+            {'int': ["month", "maxAttendees"]},
             {'CITY': 'city', 'TOPIC': 'topics',
              'MONTH': 'month',
              'MAX_ATTENDEES': 'maxAttendees'})
