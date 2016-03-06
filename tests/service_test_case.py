@@ -2,6 +2,7 @@ import unittest
 
 from google.appengine.ext import ndb
 from google.appengine.api import users
+from google.appengine.api import taskqueue
 from google.appengine.ext import testbed
 from mock import MagicMock
 
@@ -22,6 +23,7 @@ class ServiceTestCase(unittest.TestCase):
         self.testbed.init_datastore_v3_stub()
         self.testbed.init_memcache_stub()
         self.testbed.init_user_stub()
+        self.testbed.init_taskqueue_stub()
         # Clear ndb's in-context cache between tests.
         # This prevents data from leaking between tests.
         # Alternatively, you could disable caching by
