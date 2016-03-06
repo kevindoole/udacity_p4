@@ -33,6 +33,7 @@ from settings import WEB_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID, \
     ANDROID_AUDIENCE
 from support.AppliesFilters import AppliesFilters
 from support.Auth import Auth
+from support.FeaturesSpeakers import MEMCACHE_FEATURED_SPEAKER_KEY
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -375,6 +376,14 @@ class ConferenceApi(remote.Service):
     def get_speakers(self, request):
         """Return a list of all speakers."""
         return self.speaker_service.get_speakers()
+
+    @endpoints.method(message_types.VoidMessage, StringMessage,
+                      path='speakers/featured', http_method='GET',
+                      name='getFeaturedSpeaker')
+    def get_featured_speaker(self, request):
+        """Return featured speaker from memcache."""
+        return StringMessage(
+            data=memcache.get(MEMCACHE_FEATURED_SPEAKER_KEY) or "")
 
     @endpoints.method(WISHLIST_POST_REQUEST, WishlistForm, path='wishlist',
                       http_method='POST', name='addToMyWishlist')

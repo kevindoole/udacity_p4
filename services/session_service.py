@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import endpoints
+from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from models.conference_session import ConferenceSession, ConferenceSessionForms
@@ -72,6 +73,10 @@ class SessionService(BaseService):
         if request.speakerEmails:
             data['speakerKeys'] = [SpeakerService.find_or_create(email) for
                                    email in request.speakerEmails]
+            taskqueue.add(
+                params={'speakers': '|||'.join(data['speakerKeys']),
+                        'websafe_conference_key': request.websafeConferenceKey},
+                url='/tasks/cache_featured_speaker')
 
         del data['speakerEmails']
         # TODO: Enable speaker entities to be updated

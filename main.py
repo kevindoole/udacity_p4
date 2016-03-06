@@ -16,6 +16,7 @@ import webapp2
 from google.appengine.api import app_identity
 from google.appengine.api import mail
 from conference import ConferenceApi
+from support.FeaturesSpeakers import FeaturesSpeakers
 
 
 class SetAnnouncementHandler(webapp2.RequestHandler):
@@ -42,4 +43,5 @@ class SendConfirmationEmailHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/crons/set_announcement', SetAnnouncementHandler),
     ('/tasks/send_confirmation_email', SendConfirmationEmailHandler),
+    ('/tasks/cache_featured_speaker', FeaturesSpeakers),
 ], debug=True)
