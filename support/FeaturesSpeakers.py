@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+"""FeaturesSpeakers.py
+
+If a new session is posted and the speaker is involved in other sessions in
+the same conference, their websafe key is cached as the featured speaker.
+
+If multiple speakers could be featured, we pick one at random.
+
+"""
+
 import random
 
 import webapp2
@@ -10,7 +21,10 @@ MEMCACHE_FEATURED_SPEAKER_KEY = "FEATURED_SPEAKER"
 
 
 class FeaturesSpeakers(webapp2.RequestHandler):
+    """Handles the feature speaker task form the queue"""
+
     def post(self):
+        """Checks for featured speakers, and caches one if found."""
         keys = self.request.get('speakers').split('|||')
 
         c_key = ndb.Key(urlsafe=self.request.get('websafe_conference_key'))

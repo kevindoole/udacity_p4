@@ -20,6 +20,7 @@ from support.FeaturesSpeakers import FeaturesSpeakers
 
 
 class SetAnnouncementHandler(webapp2.RequestHandler):
+    """Handles the announcement cron job."""
     def get(self):
         """Set Announcement in Memcache."""
         ConferenceApi.cache_announcement()
@@ -27,6 +28,7 @@ class SetAnnouncementHandler(webapp2.RequestHandler):
 
 
 class SendConfirmationEmailHandler(webapp2.RequestHandler):
+    """Handles the confirmation email task."""
     def post(self):
         """Send email confirming Conference creation."""
         mail.send_mail(

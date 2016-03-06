@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""conference_session.py
+
+Models for the ConferenceSession ndb kind and protorpc messages.
+
+"""
+
 from protorpc import messages
 from google.appengine.ext import ndb
 
@@ -33,15 +41,16 @@ class ConferenceSessionForms(messages.Message):
 
 
 class ConferenceSessionQueryForm(messages.Message):
-    """ConferenceQueryForm -- Conference query inbound form message"""
+    """ConferenceSessionQueryForm -- ConferenceSession query inbound
+    form message"""
     field = messages.StringField(1)
     operator = messages.StringField(2)
     value = messages.StringField(3)
 
 
 class ConferenceSessionQueryForms(messages.Message):
-    """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form
-    message"""
+    """ConferenceSessionQueryForms -- multiple ConferenceSessionQueryForm
+    inbound form message"""
     filters = messages.MessageField(ConferenceSessionQueryForm, 1,
                                     repeated=True)
     typeOfSession = messages.StringField(2, required=True)

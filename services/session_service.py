@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""profile_service.py
+
+Handle requests related to ConferenceSessions.
+"""
+
 from datetime import datetime
 
 import endpoints
@@ -13,6 +20,8 @@ from support.Auth import Auth
 
 
 class SessionService(BaseService):
+    """Interface between the client and ConferenceSession Data Store."""
+
     def __init__(self, auth=None):
         self.auth = auth if auth is not None else Auth()
 
@@ -105,8 +114,17 @@ class SessionService(BaseService):
         return sess.urlsafe()
 
     def check_owner(self, conf, user):
+        """Checks the owner of a conference.
+
+        Args:
+            conf (Conference)
+            user (endpoints.user)
+
+        Raises:
+            endpoints.BadRequestException
+        """
         owner_id = conf.organizerUserId
-        user_id = self.auth.getUserId(user)
+        user_id = self.auth.get_user_id(user)
         if user_id != owner_id:
             raise endpoints.BadRequestException("You must be the conference "
                                                 "organizer to add sessions")
@@ -145,6 +163,14 @@ class SessionService(BaseService):
 
     def get_conference_sessions_by_type(self, websafe_conference_key,
                                         session_type):
+        """Gets a list of sessions in a conference with a specific type.
+
+        Args:
+             websafe_conference_key (string)
+
+        Returns:
+            ConferenceSessionForms
+        """
         sessions = ConferenceSession.query(ndb.AND(
             ConferenceSession.websafeConferenceKey == websafe_conference_key,
             ConferenceSession.typeOfSession == session_type)).fetch()
@@ -155,7 +181,16 @@ class SessionService(BaseService):
 
     def get_sessions_by_type_and_filters(self, websafe_conference_key,
                                          session_type, filters):
+        """Gets a list of sessions with a specific type and arbitrary filters.
 
+        Args:
+             websafe_conference_key (string)
+             session_type (string)
+             filters (list)
+
+        Returns:
+            ConferenceSessionForms
+        """
         if filters:
             filter_maker = AppliesFilters(
                 ConferenceSession,

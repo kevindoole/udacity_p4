@@ -21,7 +21,7 @@ from models.conference import Conference, ConferenceForm, ConferenceForms, \
 from models.conference_session import ConferenceSessionForms, \
     ConferenceSessionForm, ConferenceSessionQueryForms
 from models.models import ConflictException, StringMessage, BooleanMessage
-from models.profile import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
+from models.profile import Profile, ProfileMiniForm, ProfileForm
 from models.speaker import SpeakerForms
 from models.wishlist import WishlistForm
 from services.conference_service import ConferenceService
@@ -131,7 +131,7 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = self.auth.getUserId(user)
+        user_id = self.auth.get_user_id(user)
 
         # create ancestor query for all key matches for this user
         confs = Conference.query(ancestor=ndb.Key(Profile, user_id))
@@ -194,9 +194,9 @@ class ConferenceApi(remote.Service):
         """Create Announcement & assign to memcache; used by
         memcache cron job & putAnnouncement().
         """
-        confs = Conference.query(ndb.AND(Conference.seatsAvailable <= 5,
-                                         Conference.seatsAvailable > 0)).fetch(
-            projection=[Conference.name])
+        confs = Conference.query(ndb.AND(
+            Conference.seatsAvailable <= 5, Conference.seatsAvailable > 0
+        )).fetch(projection=[Conference.name])
 
         if confs:
             # If there are almost sold out conferences,
@@ -345,6 +345,7 @@ class ConferenceApi(remote.Service):
                       path='conference/{websafeConferenceKey}/sessions',
                       http_method='GET', name='getConferenceSessions')
     def get_conference_sessions(self, request):
+        """Get all the sessions in a conference."""
         return self.session_service.get_conference_sessions(
             request.websafeConferenceKey)
 
@@ -352,6 +353,7 @@ class ConferenceApi(remote.Service):
                       path='speaker/{websafeSpeakerKey}/sessions',
                       http_method='GET', name='getSpeakerSessions')
     def get_speaker_sessions(self, request):
+        """Get all the sessions by a speaker, across all conferences."""
         return self.session_service.get_speaker_sessions(
             request.websafeSpeakerKey)
 
@@ -360,6 +362,7 @@ class ConferenceApi(remote.Service):
                            'sessionType}', http_method='GET',
                       name='getSessionsByType')
     def get_sessions_by_type(self, request):
+        """Get all the sessions of a particular type in a conference."""
         return self.session_service.get_conference_sessions_by_type(
             request.websafeConferenceKey, request.sessionType)
 
@@ -367,6 +370,8 @@ class ConferenceApi(remote.Service):
                       path='query-sessions', http_method='POST',
                       name='getSessionsByTypeAndFilters')
     def get_sessions_by_type_and_filters(self, request):
+        """Get all the sessions of a particular type in a conference, and
+        filter it by title, duration, date or start time."""
         return self.session_service.get_sessions_by_type_and_filters(
             request.websafeConferenceKey,
             request.typeOfSession, request.filters)
@@ -403,6 +408,7 @@ class ConferenceApi(remote.Service):
                       path='wishlist', http_method='GET',
                       name='getSessionsInWishlist')
     def get_sessions_in_wishlist(self, request):
+        """Get all the sessions this user has saved in their wishlist."""
         user = endpoints.get_current_user()
         return self.wishlist_service.get_sessions_in_wishlist(user)
 
@@ -411,6 +417,8 @@ class ConferenceApi(remote.Service):
                       http_method='GET',
                       name='getSessionsByWishlistSpeakers')
     def get_sessions_by_speakers_in_wishlist(self, request):
+        """Get all the sessions from all conferences that feature speakers
+        that this user has in their wishlist sessions."""
         user = endpoints.get_current_user()
         return self.wishlist_service.get_sessions_by_speaker_in_wishlist(
             user)
@@ -420,6 +428,8 @@ class ConferenceApi(remote.Service):
                       http_method='GET',
                       name='getSessionsByWishlistTypes')
     def get_sessions_by_types_in_wishlist(self, request):
+        """Get all the sessions from any conference of the same types that
+        this user has in their wishlist sessions."""
         user = endpoints.get_current_user()
         return self.wishlist_service.get_sessions_by_types_in_wishlist(
             user)

@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""conference.py
+
+Models for the Conference ndb kind and protorpc messages.
+
+"""
+
 from protorpc import messages
 from google.appengine.ext import ndb
 

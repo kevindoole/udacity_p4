@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""conference_service.py
+
+Handle requests related to Conferences.
+"""
+
 from datetime import datetime
 
 import endpoints
@@ -14,6 +21,8 @@ DEFAULTS = {"city": "Default City", "maxAttendees": 0, "seatsAvailable": 0,
 
 
 class ConferenceService(BaseService):
+    """Interface between the client and Conference Data Store."""
+
     def __init__(self, auth=None):
         self.auth = auth if auth is not None else Auth()
 
@@ -36,11 +45,10 @@ class ConferenceService(BaseService):
     def create_conference_object(self, request):
         """Create or update Conference object, returning
         ConferenceForm/request."""
-        # preload necessary data items
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = self.auth.getUserId(user)
+        user_id = self.auth.get_user_id(user)
 
         if not request.name:
             raise endpoints.BadRequestException(
@@ -54,10 +62,10 @@ class ConferenceService(BaseService):
 
         # add default values for those missing (both data model & outbound
         # Message)
-        for df in DEFAULTS:
-            if data[df] in (None, []):
-                data[df] = DEFAULTS[df]
-                setattr(request, df, DEFAULTS[df])
+        for default in DEFAULTS:
+            if data[default] in (None, []):
+                data[default] = DEFAULTS[default]
+                setattr(request, default, DEFAULTS[default])
 
         # convert dates from strings to Date objects; set month based on
         # start_date
@@ -94,10 +102,11 @@ class ConferenceService(BaseService):
 
     @ndb.transactional()
     def update_conference_object(self, request):
+        """Update a conference with user input."""
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
-        user_id = self.auth.getUserId(user)
+        user_id = self.auth.get_user_id(user)
 
         # copy ConferenceForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in

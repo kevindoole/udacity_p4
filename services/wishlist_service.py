@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""speaker_service.py
+
+Handle requests related to Wishlists.
+"""
+
 from google.appengine.ext import ndb
 
 from models.conference_session import ConferenceSessionForms, \
@@ -13,11 +20,21 @@ from support.Auth import Auth
 
 
 class WishlistService(BaseService):
+    """Interface between the client and Wishlist Data Store."""
+
     def __init__(self, auth=None):
         self.speaker_service = SpeakerService()
         self.auth = auth if auth is not None else Auth()
 
     def get_sessions_in_wishlist(self, user):
+        """Gets all the sessions in this user's wishlist.
+
+        Args:
+            user (endpoints.user)
+
+        Returns:
+             ConferenceSessionForms
+        """
         sessions = self.wishlist_sessions(user)
 
         session_service = SessionService()
@@ -28,6 +45,7 @@ class WishlistService(BaseService):
                 for session in sessions])
 
     def wishlist_sessions(self, user):
+        """Helper gets a list of sessions given a user."""
         wishlist_key = self.get_wishlist_key(user)
         session_keys = [ndb.Key(urlsafe=wsck) for wsck in
                         wishlist_key.get().sessionKeys]
@@ -35,7 +53,8 @@ class WishlistService(BaseService):
         return sessions
 
     def get_wishlist_key(self, user):
-        user_id = self.auth.getUserId(user)
+        """Helper gets a wishlist key, given a user."""
+        user_id = self.auth.get_user_id(user)
         p_key = ndb.Key(Profile, user_id)
 
         wishlists = Wishlist.query(ancestor=p_key).fetch()
@@ -49,6 +68,15 @@ class WishlistService(BaseService):
         return wl_k
 
     def add_session_to_wishlist(self, websafe_session_key, user):
+        """Adds a session to the user's wishlist.
+
+        Args:
+            websafe_session_key (string)
+            user (endpoints.user)
+
+        Returns:
+             WishlistForm
+        """
         wl_key = self.get_wishlist_key(user)
 
         wishlist = wl_key.get()
@@ -63,6 +91,15 @@ class WishlistService(BaseService):
         return self.to_message(wishlist)
 
     def remove_session_from_wishlist(self, websafe_session_key, user):
+        """Removes a session from the user's wishlist.
+
+        Args:
+            websafe_session_key (string)
+            user (endpoints.user)
+
+        Returns:
+             WishlistForm
+        """
         wishlist = self.get_wishlist_key(user).get()
         if wishlist is None or wishlist.sessionKeys is []:
             raise ConflictException("This session is not in your wishlist.")
@@ -77,6 +114,14 @@ class WishlistService(BaseService):
         return self.to_message(wishlist)
 
     def get_sessions_by_speaker_in_wishlist(self, user):
+        """Gets a list of sessions by speakers referenced in user's wishlist.
+
+        Args:
+            user (endpoints.user)
+
+        Returns:
+             ConferenceSessionForms
+        """
         sessions = self.wishlist_sessions(user)
 
         speaker_keys = []
@@ -96,6 +141,14 @@ class WishlistService(BaseService):
                    for s in sessions])
 
     def get_sessions_by_types_in_wishlist(self, user):
+        """Gets a list of sessions with types referenced in user's wishlist.
+
+        Args:
+            user (endpoints.user)
+
+        Returns:
+             ConferenceSessionForms
+        """
         sessions = self.wishlist_sessions(user)
 
         types = [getattr(s, 'typeOfSession') for s in sessions]
@@ -109,6 +162,14 @@ class WishlistService(BaseService):
                    for s in sessions])
 
     def to_message(self, wishlist):
+        """Helper takes a wishlist entity and returns a message.
+
+        Args:
+            wishlist (Wishlist)
+
+        Returns:
+            WishlistForm
+        """
         return WishlistForm(
             sessionKeys=wishlist.sessionKeys
         )

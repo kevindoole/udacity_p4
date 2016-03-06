@@ -33,7 +33,7 @@ class ServiceTestCase(unittest.TestCase):
 
     def mock_auth(self, email_address):
         auth = Auth()
-        auth.getUserId = MagicMock(return_value=unicode(email_address))
+        auth.get_user_id = MagicMock(return_value=unicode(email_address))
         return auth
 
     def loginUser(self, email='user@example.com', id='123', is_admin=False):

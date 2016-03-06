@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""profile_service.py
+
+Handle requests related to Profiles.
+"""
+
 import endpoints
 from google.appengine.ext import ndb
 
@@ -7,6 +14,8 @@ from support.Auth import Auth
 
 
 class ProfileService(BaseService):
+    """Interface between the client and Profile Data Store."""
+
     def __init__(self):
         self.auth = Auth()
 
@@ -36,7 +45,7 @@ class ProfileService(BaseService):
             raise endpoints.UnauthorizedException('Authorization required')
 
         # get Profile from datastore
-        user_id = self.auth.getUserId(user)
+        user_id = self.auth.get_user_id(user)
         p_key = ndb.Key(Profile, user_id)
         profile = p_key.get()
         # create new Profile if not there

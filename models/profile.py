@@ -1,9 +1,17 @@
+#!/usr/bin/env python
+
+"""profile.py
+
+Models for the Profile ndb kind and protorpc messages.
+
+"""
+
 from protorpc import messages
 from google.appengine.ext import ndb
 
 
 class Profile(ndb.Model):
-    """Profile -- User profile object"""
+    """User profile object"""
     displayName = ndb.StringProperty()
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
@@ -17,7 +25,7 @@ class ProfileMiniForm(messages.Message):
 
 
 class ProfileForm(messages.Message):
-    """ProfileForm -- Profile outbound form message"""
+    """Profile outbound form message"""
     displayName = messages.StringField(1)
     mainEmail = messages.StringField(2)
     teeShirtSize = messages.EnumField('TeeShirtSize', 3)

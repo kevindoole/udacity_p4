@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""AppliesFilters.py
+
+Enables appending generic field, operator, value filtering to an ndb query.
+
+"""
+
 from datetime import datetime
 
 import endpoints
@@ -8,7 +16,10 @@ OPERATORS = {'EQ': '=', 'GT': '>', 'GTEQ': '>=', 'LT': '<', 'LTEQ': '<=',
 
 
 class AppliesFilters(object):
+    """Register a set of filters and then apply them to an ndb query."""
+
     def __init__(self, kind, field_types, fields):
+        """Initialize possible filter types and fields"""
         self.kind = kind
         self.int_values = field_types.get('int', [])
         self.date_values = field_types.get('date', [])
@@ -18,19 +29,19 @@ class AppliesFilters(object):
                   websafe_conference_key=None):
         """Return formatted query from the submitted filters."""
         if websafe_conference_key:
-            q = self.kind.query(
+            query = self.kind.query(
                 self.kind.websafeConferenceKey == websafe_conference_key)
         else:
-            q = self.kind.query()
+            query = self.kind.query()
 
         inequality_filter, filters = self.format_filters(filters)
 
         # If exists, sort on inequality filter first
         if not inequality_filter:
-            q = q.order(getattr(self.kind, order_by_field))
+            query = query.order(getattr(self.kind, order_by_field))
         else:
-            q = q.order(ndb.GenericProperty(inequality_filter))
-            q = q.order(getattr(self.kind, order_by_field))
+            query = query.order(ndb.GenericProperty(inequality_filter))
+            query = query.order(getattr(self.kind, order_by_field))
 
         for filtr in filters:
             if filtr["field"] in self.int_values:
@@ -41,8 +52,8 @@ class AppliesFilters(object):
             formatted_query = ndb.query.FilterNode(filtr["field"],
                                                    filtr["operator"],
                                                    filtr["value"])
-            q = q.filter(formatted_query)
-        return q
+            query = query.filter(formatted_query)
+        return query
 
     def format_filters(self, filters):
         """Parse, check validity and format user supplied filters."""

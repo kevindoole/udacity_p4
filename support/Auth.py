@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+"""Auth.py
+
+Gets a valid user id.
+
+"""
+
 import json
 import os
 import time
@@ -9,14 +17,17 @@ from models.conference import Conference
 
 
 class Auth(object):
-    def getUserId(self, user, id_type="email"):
+    """Get a valid user id."""
+
+    def get_user_id(self, user, id_type="email"):
+        """Get a user id from an endpoints user."""
         if id_type == "email":
             return user.email()
 
         if id_type == "oauth":
-            """A workaround implementation for getting userid."""
+            # A workaround implementation for getting userid.
             auth = os.getenv('HTTP_AUTHORIZATION')
-            bearer, token = auth.split()
+            _, token = auth.split()
             token_type = 'id_token'
             if 'OAUTH_USER_ID' in os.environ:
                 token_type = 'access_token'
