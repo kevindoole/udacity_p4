@@ -397,5 +397,23 @@ class ConferenceApi(remote.Service):
         user = endpoints.get_current_user()
         return self.wishlist_service.get_sessions_in_wishlist(user)
 
+    @endpoints.method(message_types.VoidMessage, ConferenceSessionForms,
+                      path='wishlist/sessions-by-wishlist-speakers',
+                      http_method='GET',
+                      name='getSessionsByWishlistSpeakers')
+    def get_sessions_by_speakers_in_wishlist(self, request):
+        user = endpoints.get_current_user()
+        return self.wishlist_service.get_sessions_by_speaker_in_wishlist(
+            user)
+
+    @endpoints.method(message_types.VoidMessage, ConferenceSessionForms,
+                      path='wishlist/sessions-by-wishlist-types',
+                      http_method='GET',
+                      name='getSessionsByWishlistTypes')
+    def get_sessions_by_types_in_wishlist(self, request):
+        user = endpoints.get_current_user()
+        return self.wishlist_service.get_sessions_by_types_in_wishlist(
+            user)
+
 
 api = endpoints.api_server([ConferenceApi])  # register API

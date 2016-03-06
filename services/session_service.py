@@ -25,7 +25,7 @@ class SessionService(BaseService):
         Returns:
              SessionForm
         """
-        speaker_keys = entity.speakerKeys
+        speaker_keys = getattr(entity, 'speakerKeys', None)
         if speaker_keys is not None:
             speaker_emails = [ndb.Key(urlsafe=key).get().email for key in
                               speaker_keys]
