@@ -34,6 +34,10 @@ class SessionService(BaseService):
 
         form.websafeSessionKey = entity.key.urlsafe()
 
+        date, time = str(entity.dateTime.date()), str(entity.dateTime.time())
+        form.date = date
+        form.startTime = time
+
         return super(SessionService, self).copy_entity_to_form(form, entity)
 
     def create_conference_session(self, request, user):
@@ -85,8 +89,12 @@ class SessionService(BaseService):
 
         # convert dates from strings to Date objects;
         # set month based on start_date
-        data['date'] = datetime.strptime(data['date'], "%Y-%m-%d").date()
-        data['startTime'] = datetime.strptime(data['startTime'], "%H:%M").time()
+        data['dateTime'] = datetime.strptime(
+            data['date'] + ' ' + data['startTime'], "%Y-%m-%d %H:%M")
+        data['hour'] = data['dateTime'].hour
+
+        del data['date']
+        del data['startTime']
 
         s_id = ConferenceSession.allocate_ids(size=1, parent=c_key)[0]
         s_key = ndb.Key(ConferenceSession, s_id, parent=c_key)
@@ -151,13 +159,12 @@ class SessionService(BaseService):
         if filters:
             filter_maker = AppliesFilters(
                 ConferenceSession,
-                {'date': ['date'],
-                 'time': ['startTime'],
-                 'int': ['duration']},
+                {'datetime': ['dateTime'],
+                 'int': ['duration', 'hour']},
                 {'TITLE': 'title',
                  'DURATION': 'duration',
-                 'DATE': 'date',
-                 'START_TIME': 'startTime'})
+                 'DATE': 'dateTime',
+                 'HOUR': 'hour'})
             sessions = filter_maker.get_query(
                 filters, 'title', websafe_conference_key).fetch()
         else:

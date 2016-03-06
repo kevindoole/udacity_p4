@@ -10,8 +10,8 @@ class ConferenceSession(ndb.Model):
     speakerKeys = ndb.TextProperty(repeated=True, indexed=True)
     duration = ndb.IntegerProperty()
     typeOfSession = ndb.StringProperty()
-    date = ndb.DateProperty(required=True)
-    startTime = ndb.TimeProperty(required=True)
+    dateTime = ndb.DateTimeProperty(required=True)
+    hour = ndb.IntegerProperty()
 
 
 class ConferenceSessionForm(messages.Message):

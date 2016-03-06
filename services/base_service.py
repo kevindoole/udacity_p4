@@ -4,13 +4,10 @@ class BaseService(object):
         :param entity:
         :param form:
         """
+
         for field in form.all_fields():
             if hasattr(entity, field.name):
-                # convert Date to date string; just copy others
-                if field.name == 'date' or field.name == 'startTime':
-                    setattr(form, field.name, str(getattr(entity, field.name)))
-                else:
-                    setattr(form, field.name, getattr(entity, field.name))
+                setattr(form, field.name, getattr(entity, field.name))
             elif field.name == "websafeKey":
                 setattr(form, field.name, entity.key.urlsafe())
         form.check_initialized()
