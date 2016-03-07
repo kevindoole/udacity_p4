@@ -28,6 +28,8 @@ class BaseService(object):
         """
 
         for field in form.all_fields():
+            if (field.name is 'teeShirtSize'):
+                continue
             if hasattr(entity, field.name):
                 setattr(form, field.name, getattr(entity, field.name))
             elif field.name == "websafeKey":

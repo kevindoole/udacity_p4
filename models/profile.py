@@ -10,28 +10,6 @@ from protorpc import messages
 from google.appengine.ext import ndb
 
 
-class Profile(ndb.Model):
-    """User profile object"""
-    displayName = ndb.StringProperty()
-    mainEmail = ndb.StringProperty()
-    teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
-    conferenceKeysToAttend = ndb.StringProperty(repeated=True)
-
-
-class ProfileMiniForm(messages.Message):
-    """ProfileMiniForm -- update Profile form message"""
-    displayName = messages.StringField(1)
-    teeShirtSize = messages.EnumField('TeeShirtSize', 2)
-
-
-class ProfileForm(messages.Message):
-    """Profile outbound form message"""
-    displayName = messages.StringField(1)
-    mainEmail = messages.StringField(2)
-    teeShirtSize = messages.EnumField('TeeShirtSize', 3)
-    conferenceKeysToAttend = messages.StringField(4, repeated=True)
-
-
 class TeeShirtSize(messages.Enum):
     """TeeShirtSize -- t-shirt size enumeration value"""
     NOT_SPECIFIED = 1
@@ -49,3 +27,25 @@ class TeeShirtSize(messages.Enum):
     XXL_W = 13
     XXXL_M = 14
     XXXL_W = 15
+
+
+class Profile(ndb.Model):
+    """User profile object"""
+    displayName = ndb.StringProperty()
+    mainEmail = ndb.StringProperty()
+    teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
+    conferenceKeysToAttend = ndb.StringProperty(repeated=True)
+
+
+class ProfileMiniForm(messages.Message):
+    """ProfileMiniForm -- update Profile form message"""
+    displayName = messages.StringField(1)
+    teeShirtSize = messages.EnumField(TeeShirtSize, 2)
+
+
+class ProfileForm(messages.Message):
+    """Profile outbound form message"""
+    displayName = messages.StringField(1)
+    mainEmail = messages.StringField(2)
+    teeShirtSize = messages.EnumField('TeeShirtSize', 3)
+    conferenceKeysToAttend = messages.StringField(4, repeated=True)

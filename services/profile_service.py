@@ -29,7 +29,7 @@ class ProfileService(BaseService):
         Returns:
              ProfileForm
         """
-        tee_shirt_size = getattr(TeeShirtSize, profile.teeShirtSize)
+        tee_shirt_size = str(getattr(TeeShirtSize, profile.teeShirtSize))
         if tee_shirt_size is not None:
             profile_form.teeShirtSize = getattr(TeeShirtSize, tee_shirt_size)
 
