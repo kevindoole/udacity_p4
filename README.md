@@ -34,9 +34,6 @@ direct link from a speaker to a session. On the flip side, sessions are
 greatly impacted by having or not having speakers, so keeping a list
 of speakers on the session entity seemed to be well worth our while.
 
-To enable API users to work with sessions and users easily, each have
-their own service class that helps simplify interacting with datastore.
-
 On the API side, in addition to the requested endpoints
 (getConferenceSessions, getConferenceSessionsByType, createSession,
 getSessionsBySpeaker), we also have getSpeakers, which helps us find
