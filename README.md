@@ -48,8 +48,8 @@ create some features around wishlists. I added these endpoints:
 
 - getSessionsByWishlistSpeakers: gets other sessions (from any
 conference) that speakers in the user's wishlist are involved in
-- getSessionsByWishlistTypes: gets other conferences with topics that
-are found in the user's wishlist
+- getSessionsByWishlistTypes: gets other sessions (from any conference)
+with topics that are found in the user's wishlist
 
 ## Task 3: Querying for specific sets of sessions
 
