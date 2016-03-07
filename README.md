@@ -12,6 +12,7 @@ are made to address questions posed in the course material.
 ## Installation
 
 In order to try the api out:
+
 1. Clone the repo `git clone git@github.com:kevindoole/udacity_p4.git`.
 2. Install (GoogleAppEngineLauncher)[https://cloud.google.com/appengine/downloads].
 3. Run AppEngineLauncher and find the option to "Add existing
