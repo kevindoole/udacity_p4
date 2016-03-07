@@ -19,9 +19,6 @@ with the domain layer.
 - The client layer handles authorization and provides the actual
 endpoints that users of the API will use to interact with data.
 
-TODO: Models and messages in the domain layer extend base model and
-message classes which simplify composing messages from models, and back.
-
 ### Session and speaker implementation
 
 Task one in this project was to implement sessions and speakers.
