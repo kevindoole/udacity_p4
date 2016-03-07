@@ -9,6 +9,18 @@ This is a project created by the Udacity team as part of the Full-Stack
 Developer Nanodegree program. To that end, various comments below
 are made to address questions posed in the course material.
 
+## Installation
+
+In order to try the api out:
+1. Clone the repo `git clone git@github.com:kevindoole/udacity_p4.git`.
+2. Install (GoogleAppEngineLauncher)[https://cloud.google.com/appengine/downloads].
+3. Run AppEngineLauncher and find the option to "Add existing
+ application..." which you can use to add the cloned repo.
+4. Once you've added the application, run it and visit
+ localhost:8080/_ah/api/explorer to use the api explorer.
+5. If you have an Google App Engine instance, change the application ID
+ at the top of app.yaml to your own, and deploy to use the api online.
+
 ## Architecture
 
 At a high level, the API is organized into three layers: the domain
