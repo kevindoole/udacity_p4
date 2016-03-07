@@ -71,8 +71,8 @@ valid.
 
 One solution to this problem would be to create a Datastore kind called
 SessionType, which ConferenceSessions would descend from. In this way,
-it would be possible to query for conference sessions where the
-descendant is a particular session type, and the time is before 7pm.
+it would be possible to query for conference sessions which descend from
+a particular session type, and the time is before 7pm.
 
 Another option is to query for all sessions at a particular time, and
 then apply the type filter programatically after all records have been
@@ -80,11 +80,6 @@ retrieved from Datastore. This solution is not as scalable, but a little
 easier to complete.
 
 If I needed to maintain this project beyond the date when I submit it 
-for review, I would most definitely opt for creating a kind. Because I 
-don't need to maintain it, I'll go with the easier option, filtering 
-results programmatically. See `getSessionsByTypeAndFilters`.
-
-
-rubric: https://docs.google.com/document/d/1lVFoZDY-jjg6SoI8g5uZ72V3TDp7iLTz2UGWAI5ZvfE/pub
-https://docs.google.com/document/d/1H9anIDV4QCPttiQEwpGe6MnMBx92XCOlz0B4ciD7lOs/pub
-https://www.udacity.com/course/viewer#!/c-nd004/l-3566359178/m-3636408594
+for review, I would most definitely opt for creating a SessionType kind.
+Because I don't need to maintain it, I'll go with the easier option,
+filtering results programatically. See `getSessionsByTypeAndFilters`.
